@@ -1,0 +1,35 @@
+name: Delete Virtual Machine
+
+on:
+  workflow_dispatch: # Permite execução manual do workflow
+
+jobs:
+  delete-vm:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up VirtualBox
+      run: sudo apt-get install -y virtualbox
+
+    - name: Create delete_vm.sh script
+      run: |
+        echo '#!/bin/bash
+        VM_NAME="Ubuntu_VM"
+        VM_EXIST=$(VBoxManage list vms | grep "\"$VM_NAME\"")
+        if [ -n "$VM_EXIST" ]; then
+          echo "Deletando a máquina virtual \$VM_NAME..."
+          VBoxManage unregistervm "\$VM_NAME" --delete
+          echo "Máquina virtual \$VM_NAME deletada com sucesso."
+        else
+          echo "A máquina virtual \$VM_NAME não existe."
+        fi' > delete_vm.sh
+      shell: bash
+
+    - name: Give execute permission to the script
+      run: chmod +x delete_vm.sh
+
+    - name: Run delete script
+      run: ./delete_vm.sh
